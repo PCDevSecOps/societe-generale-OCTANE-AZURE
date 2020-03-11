@@ -102,7 +102,7 @@ For further details, a more complete READme is available in each directory.
 
 ## Authors
 
-This project has been created in 2020 by [Marouan BELGHITH](https://github.com/marwenB), Domain Owner by [Lucas BARRIERE](https://github.com/urluba) and Product Owner by [Yannick NEFF](https://github.com/yannickneff)
+This project has been created in 2020 by [Marouan BELGHITH](https://github.com/marouanBl), Domain Owner by [Lucas BARRIERE](https://github.com/urluba) and Product Owner by [Yannick NEFF](https://github.com/yannickneff)
 
 ## Contributors
 
