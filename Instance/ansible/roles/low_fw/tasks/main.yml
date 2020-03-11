@@ -1,0 +1,46 @@
+---
+
+- name: Add granted domains
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "granted_domains_{{stack}}.yml"
+      skip: true
+  tags:
+    - low_fw
+    - init
+    - grantdomain
+
+- name: Add revoked domains
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "revoked_domains_{{stack}}.yml"
+      skip: true
+  tags:
+    - low_fw
+    - revokedomain
+
+- import_tasks: grant/nginx_directories.yml
+  tags:
+    - init
+    - grantdomain
+    - low_fw
+
+- import_tasks: grant/iptables.yml
+  tags:
+    - init
+    - grantdomain
+    - revokedomain
+    - low_fw
+
+- import_tasks: grant/nginx.yml
+  tags:
+    - init
+    - grantdomain
+    - low_fw
+
+- import_tasks: revoke/nginx.yml
+  tags:
+    - revokedomain
+    - low_fw

@@ -1,0 +1,17 @@
+---
+
+v_certificates_path: "/etc/ssl/private"
+v_suricata_root_directory: "/opt/suricata"
+v_external_listening_address: "127.0.0.1"
+v_suricata_listening_address: "127.0.0.2"
+v_region: "eu-west-1"
+v_clb_up_mid:  "CLBUPMID"
+v_clb_up_vpn:  "CLBUPVPN"
+v_clb_mid_low: "CLBMIDLO"
+v_hosting_up: "SGUP"
+v_hosting_mid: "SGMID"
+v_hosting_low: "SGLOW"
+v_log_path: "/var/log"
+v_http_proxy: ""
+v_https_proxy: ""
+v_vm_user: "cloud-user"

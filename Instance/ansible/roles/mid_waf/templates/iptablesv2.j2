@@ -1,0 +1,12 @@
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [214:43782]
+
+{% for domain in granted_domains %}
+-A INPUT -p tcp -m tcp --sport {{ domain.http_listening_port }} -j NFQUEUE --queue-num {{ domain.http_listening_port }} --queue-bypass
+
+-A OUTPUT -p tcp -m tcp --dport {{ domain.http_listening_port }} -j NFQUEUE --queue-num {{ domain.http_listening_port }} --queue-bypass
+{% endfor %}
+
+COMMIT

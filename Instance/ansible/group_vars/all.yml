@@ -1,0 +1,35 @@
+---
+
+v_certificates_path: "/etc/ssl/private"
+v_local_certificates_path: "certificates"
+v_local_custom_rules_path: "custom_rules"
+v_suricata_root_directory: "/opt/suricata"
+v_external_listening_address: "127.0.0.1"
+v_suricata_listening_address: "127.0.0.2"
+v_region: "northeurope"
+
+
+v_clb_up_up:  "CLBUPUP"
+v_clb_up_mid:  "CLBUPMID"
+v_clb_up_vpn:  "CLBUPVPN"
+v_clb_mid_low: "CLBMIDLOW"
+
+
+v_hosting_mid: "SGMID"
+v_hosting_low: "SGLOW"
+v_hosting_adm: "SGADM"
+
+# only for azure
+# v_rg_up: "RGUP"
+v_rg_mid: "RGMID"
+v_rg_low: "RGLOW"
+v_rg_vpn: "RGVPN"
+v_rg_oct: "RGOCT"
+v_rg_adm: "RGADM"
+v_rg_back: "RGBKD"
+
+
+v_log_path: "/var/log"
+v_http_proxy: ""
+v_https_proxy: ""
+v_vm_user: "cloud-user"

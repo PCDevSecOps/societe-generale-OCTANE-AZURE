@@ -1,0 +1,93 @@
+def get_first() {
+    node('master') {
+        return env.PATH.split(':')[0]
+        
+    }
+}
+
+
+pipeline {
+    agent { label 'windows-slave' }
+    triggers { cron('H 6 * * *')}
+     options {
+         buildDiscarder(logRotator(numToKeepStr: '3'))
+     }
+
+    environment {
+        scannerHome = tool 'SonarQube_Scanner_3.0.3'
+        ENVIRONMNT_HOSTING = "dev"
+        HOSTING_STACK = "hostingtest"
+        HOSTING_URL = "https://azurecoemb.northeurope.cloudapp.azure.com/"
+    }
+
+    stages {
+
+        stage('checkout') {
+           steps {
+                checkout scm
+           }
+        }
+
+        stage('Create:CertificatesCIAPHosting') {
+            steps {
+                ansiColor('xterm') {
+                    powershell "./Set-rsaKeys.ps1 '${ENVIRONMNT_HOSTING}'"
+                }
+            }
+        }
+
+
+        stage('Create:CIAPHosting') {
+            steps {
+                ansiColor('xterm') {
+                    powershell "./New-AzureCIAPHosting.ps1 '${ENVIRONMNT_HOSTING}' '${HOSTING_STACK}'"
+                }
+            }
+        }
+
+        stage('CreatePublish:NewDomain') {
+            steps {
+                ansiColor('xterm') {
+                    powershell "./New-AzureAPPTest.ps1 '${ENVIRONMNT_HOSTING}' '${HOSTING_STACK}'"
+                }
+            }
+        }
+
+        // stage('Check:PublishedDomain') {
+        //     steps {
+        //         ansiColor('xterm') {
+        //             powershell "./Check-AzureAPPTest.ps1 '${ENVIRONMNT_HOSTING}' '${HOSTING_URL}' "
+        //         }
+        //     }
+        // }
+
+        stage('Destroy:PublishedDomain') {
+            steps {
+                ansiColor('xterm') {
+                    powershell "./Remove-AzureAPPTest.ps1 '${ENVIRONMNT_HOSTING}' '${HOSTING_STACK}'"
+                }
+            }
+        }
+
+
+        stage('Destroy:CIAPHosting') {
+            steps {
+                ansiColor('xterm') {
+                    powershell "./Remove-AzureCIAPHosting.ps1 '${ENVIRONMNT_HOSTING}' '${HOSTING_STACK}'"
+                }
+            }
+        }
+
+
+    }
+
+     post {
+        always {
+          //cleanWs()
+          echo "finished"
+        }
+     }
+
+
+
+}

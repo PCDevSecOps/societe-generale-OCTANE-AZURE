@@ -1,0 +1,162 @@
+---
+
+- name: Delete old blacklist conf for "{{ item.domain }}"
+  file:
+    path:  "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/blacklist.conf"
+    state: absent
+  with_items:
+    - "{{ granted_domains }}"
+
+- name: Delete old whitelist conf for "{{ item.domain }}"
+  file:
+    path:  "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/whitelist.conf"
+    state: absent
+  with_items:
+    - "{{ granted_domains }}"
+
+- name: Delete old custom conf for "{{ item.domain }}"
+  file:
+    path:  "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/custom.conf"
+    state: absent
+  with_items:
+    - "{{ granted_domains }}"
+
+- name:  Add domain configuration files to nginx directory
+  template:
+    src: "modsec.conf.j2"
+    dest: "/usr/local/nginx/conf/sites/rules/modsec-{{item.domain}}.conf"
+    owner: root
+    force: yes
+    group: root
+    mode: 0644
+    backup: yes
+  with_items:
+    - "{{ granted_domains }}"
+  when:
+   - granted_domains is defined
+  notify: Reload nginx daemon
+
+- name:  Create custom modesecurity rules directory for each domain
+  file:
+      path: "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/"
+      state: directory
+      mode: 0755
+  with_items:
+    - "{{ granted_domains }}"
+  when:
+   - granted_domains is defined
+  notify: Reload nginx daemon
+
+- name:  Add custom blacklist urls
+  copy:
+    src: "{{ v_local_custom_rules_path }}/{{ item.domain }}/blacklist.conf"
+    dest: "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/blacklist.conf"
+    owner: root
+    force: yes
+    group: root
+    mode: 0644
+    backup: yes
+  with_items:
+    - "{{ granted_domains }}"
+  when:
+   - granted_domains is defined
+  notify: Reload nginx daemon
+  ignore_errors: True
+
+- name:  Add custom whitelist urls
+  copy:
+    src: "{{ v_local_custom_rules_path }}/{{ item.domain }}/whitelist.conf"
+    dest: "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/whitelist.conf"
+    owner: root
+    force: yes
+    group: root
+    mode: 0644
+    backup: yes
+  with_items:
+    - "{{ granted_domains }}"
+  when:
+   - granted_domains is defined
+  notify: Reload nginx daemon
+  ignore_errors: True
+
+- name:  Add custom domain rules
+  copy:
+    src: "{{ v_local_custom_rules_path }}/{{ item.domain }}/custom.conf"
+    dest: "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/custom.conf"
+    owner: root
+    force: yes
+    group: root
+    mode: 0644
+    backup: yes
+  with_items:
+    - "{{ granted_domains }}"
+  when:
+   - granted_domains is defined
+  notify: Reload nginx daemon
+  ignore_errors: True
+
+- name: Search blacklist urls for "{{ item.domain }}"
+  stat:
+    path: "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/blacklist.conf"
+  with_items:
+    - "{{ granted_domains }}"
+  register: mid_waf_blacklist_conf
+
+- name:  Add base custom blacklist urls
+  copy:
+    src: "rules_blacklist_fqdn.conf"
+    dest: "/usr/local/nginx/conf/sites/rules/{{ item.item.domain }}/blacklist.conf"
+    owner: root
+    force: yes
+    group: root
+    mode: 0644
+    backup: yes
+  when:
+    - item.stat.exists == False
+  with_items: "{{ mid_waf_blacklist_conf.results }}"
+  notify: Reload nginx daemon
+  
+- name: Search whitelist urls for "{{ item.domain }}"
+  stat:
+    path: "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/whitelist.conf"
+  with_items:
+    - "{{ granted_domains }}"
+  register: mid_waf_whitelist_conf
+
+- name:  Add custom base whitelist urls
+  copy:
+    src: "rules_whitelist_fqdn.conf"
+    dest: "/usr/local/nginx/conf/sites/rules/{{ item.item.domain }}/whitelist.conf"
+    owner: root
+    force: yes
+    group: root
+    mode: 0644
+    backup: yes
+  when:
+    - item.stat.exists == False
+  with_items: "{{ mid_waf_whitelist_conf.results }}"
+  notify: Reload nginx daemon
+
+- name: Search custom rules for "{{ item.domain }}"
+  stat:
+    path: "/usr/local/nginx/conf/sites/rules/{{ item.domain }}/custom.conf"
+  with_items:
+    - "{{ granted_domains }}"
+  register: mid_waf_custom_conf
+
+- name:  Add base custom rules
+  copy:
+    src: "rules_custom_fqdn.conf"
+    dest: "/usr/local/nginx/conf/sites/rules/{{ item.item.domain }}/custom.conf"
+    owner: root
+    force: yes
+    group: root
+    mode: 0644
+    backup: yes
+  when:
+    - item.stat.exists == False
+  with_items: "{{ mid_waf_custom_conf.results }}"
+  notify: Reload nginx daemon
+
+- name: restarting nginx service to apply conf
+  command: systemctl restart nginx.service 

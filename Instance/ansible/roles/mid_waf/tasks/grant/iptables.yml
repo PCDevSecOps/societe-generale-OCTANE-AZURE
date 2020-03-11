@@ -1,0 +1,19 @@
+---
+
+- name: Install python bindings for SE Linux
+  yum: name={{ item }} state=present
+  with_items:
+   - libselinux-python
+   - libsemanage-python
+
+- name: iptables INPUT
+  command: iptables -A INPUT -p tcp -m tcp --sport {{ item.http_listening_port }} -j NFQUEUE --queue-num {{ item.http_listening_port }} --queue-bypass
+  with_items: "{{ granted_domains }}"
+  register: granted_suricata_domains_changed
+  notify: Reload iptables daemon
+
+- name: iptables OUTPUT
+  command: iptables -A OUTPUT -p tcp -m tcp --dport {{ item.http_listening_port }} -j NFQUEUE --queue-num {{ item.http_listening_port }} --queue-bypass
+  with_items: "{{ granted_domains }}"
+  register: granted_suricata_domains_changed
+  notify: Reload iptables daemon

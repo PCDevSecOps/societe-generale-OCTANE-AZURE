@@ -1,0 +1,15 @@
+# Include the recommended configuration
+Include /usr/local/nginx/conf/modsecurity.conf
+
+Include /usr/local/nginx/conf/owasp-modsecurity-crs/crs-setup.conf
+{% if item.domain is defined %}
+SecRule REQUEST_URI "@pmFromFile /usr/local/nginx/conf/sites/rules/{{item.domain}}/blacklist.conf" "phase:1,id:'1000001',log,noauditlog,deny,status:403,msg:'blacklist'"
+SecRule REQUEST_URI "@pmFromFile /usr/local/nginx/conf/sites/rules/{{item.domain}}/whitelist.conf" "phase:1,id:'1000002',log,noauditlog,allow,msg:'whitelist'"
+Include /usr/local/nginx/conf/sites/rules/{{item.domain}}/custom.conf
+{% endif %}
+
+#SecRule ARGS|REQUEST_HEADERS "@contains <script>" "id:101,msg:XSSAttack,severity:ERROR,deny,log,status:403"
+
+SecRule REQUEST_COOKIES|REQUEST_COOKIES_NAMES|REQUEST_FILENAME|ARGS_NAMES|ARGS|XML:/* \
+"(\/\*\!?|\*\/|\-\-[\s\r\n\v\f]|(?:--[^-]*-)|([^\-&])#.*[\s\r\n\v\f]|;?\\x00)" \
+"phase:2,rev:'2.2.2',id:'981231',t:none,t:urlDecodeUni,block,msg:'SQL Comment Sequence Detected.',capture,logdata:'%{tx.0}',tag:'WEB_ATTACK/SQL_INJECTION',tag:'WASCTC/WASC-19',tag:'OWASP_TOP_10/A1',tag:'OWASP_AppSensor/CIE1',tag:'PCI/6.5.2',setvar:tx.anomaly_score=+%{tx.warning_anomaly_score},setvar:tx.sql_injection_score=+1,setvar:'tx.msg=%{rule.msg}',setvar:tx.%{rule.id}-WEB_ATTACK/SQL_INJECTION-%{matched_var_name}=%{tx.0},deny,log,status:403"

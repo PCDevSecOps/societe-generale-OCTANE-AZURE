@@ -1,0 +1,7 @@
+1556869495.026     30 ::1 TCP_MISS/200 12939 GET http://www.google.fr/ - HIER_DIRECT/74.125.193.94 text/html
+1556869498.764     25 ::1 TCP_MISS/200 12956 GET http://www.google.fr/ - HIER_DIRECT/74.125.193.94 text/html
+1556869499.256     28 ::1 TCP_MISS/200 12932 GET http://www.google.fr/ - HIER_DIRECT/74.125.193.94 text/html
+1556869499.541     26 ::1 TCP_MISS/200 12950 GET http://www.google.fr/ - HIER_DIRECT/74.125.193.94 text/html
+1556869499.796     25 ::1 TCP_MISS/200 12953 GET http://www.google.fr/ - HIER_DIRECT/74.125.193.94 text/html
+1556869500.002     29 ::1 TCP_MISS/200 12992 GET http://www.google.fr/ - HIER_DIRECT/74.125.193.94 text/html
+1556869500.267     26 ::1 TCP_MISS/200 12946 GET http://www.google.fr/ - HIER_DIRECT/74.125.193.94 text/html

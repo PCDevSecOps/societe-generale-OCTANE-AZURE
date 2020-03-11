@@ -1,0 +1,40 @@
+revoked_domains:
+# - backend_fqdn: www.app1.ciaphosting.com
+#   backend_port: 80
+#   backend_protocol: http
+#   domain: app1.toto.com
+#   email: toto@toto.com
+#   havp_listening_ip: 10.0.1.4 
+#   havp_listening_port: 10004  
+#   havp_protocol: http
+#   http: false
+#   http_listening_ip: 127.0.0.2
+#   http_listening_port: 81
+#   http_listening_priority: 3001
+#   https_listening_ip: 0.0.0.0
+#   https_listening_port: 443
+#   https_listening_priority: 2001
+#   id: 1
+#   mod_security: 'on'
+#   preserve_host: true
+#   proxy_timeout: 15
+
+# - backend_fqdn: www.app2.ciaphosting.com
+#   backend_port: 80
+#   backend_protocol: http
+#   domain: app2.toto.com
+#   email: toto@toto.com
+#   havp_listening_ip: 10.0.1.4 
+#   havp_listening_port: 10005  
+#   havp_protocol: http
+#   http: false
+#   http_listening_ip: 127.0.0.2
+#   http_listening_port: 82
+#   http_listening_priority: 3002
+#   https_listening_ip: 0.0.0.0
+#   https_listening_port: 443
+#   https_listening_priority: 2002
+#   id: 2
+#   mod_security: 'on'
+#   preserve_host: true
+#   proxy_timeout: 15

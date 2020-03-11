@@ -1,0 +1,11 @@
+---
+
+
+- name: Gather facts about metering instances
+  become: false
+  run_once: true
+  azure_rm_virtualmachine_facts:
+    tags:
+      - low
+      - met
+

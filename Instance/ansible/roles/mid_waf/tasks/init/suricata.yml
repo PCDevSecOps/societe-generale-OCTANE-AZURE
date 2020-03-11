@@ -1,0 +1,36 @@
+---
+
+- name:  Create SURICATA directory
+  file:
+      path: "{{ v_suricata_root_directory }}"
+      state: directory
+      mode: 0755
+  tags:
+    - next_sprint
+
+- name:  Install SURICATA from archive
+  unarchive:
+    src: suricata.tar.gz
+    dest: "{{ v_suricata_root_directory }}"
+    copy: yes
+  tags:
+    - next_sprint
+
+- name:  Install SURICATA binary compiled with NFQUEUE
+  copy:
+    src: suricata
+    dest: "{{ v_suricata_root_directory }}/suricata/bin/"
+    backup: yes
+    mode: 0755
+  tags:
+    - next_sprint
+
+- name:  Install SURICATA libraries from archive
+  unarchive:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    copy: yes
+  with_items:
+    - { src: "suricata.lib.tar.gz", dest: "/usr/lib64/" }
+  tags:
+    - next_sprint

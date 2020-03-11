@@ -1,0 +1,71 @@
+---
+
+- name: Gather facts LBs
+  become: false
+  run_once: true
+  local_action:
+    module: azure_rm_loadbalancer_facts
+  register: lb_facts
+
+- name: Pause for 2 seconds otherwise AZURE grunt
+  wait_for: timeout=2
+  delegate_to: localhost
+
+
+
+- name: Retrieve {{v_clb_mid_low }}  informations
+  become: false
+  run_once: true
+  delegate_to: localhost
+  set_fact:
+    clb_mid_low_name: "{{ item.name }}"
+    clb_mid_low_privateIPAddress: "{{ item.properties.frontendIPConfigurations[0].properties.privateIPAddress }}"
+    clb_mid_low_frontendIPConfigurations_name: "{{ item.properties.frontendIPConfigurations[0].name }}"
+    clb_mid_low_backendAddressPool_name: "{{ item.properties.backendAddressPools[0].name }}"
+    clb_mid_low_healthprobe: "{{ item.properties.probes[0].name }}"
+  with_items: "{{ lb_facts.ansible_facts.azure_loadbalancers }}"
+  when: v_clb_mid_low in item.tags
+
+
+- name: Add Health Probe to {{ v_clb_mid_low }}
+  become: false
+  run_once: true
+  shell: |
+    az network lb probe create \
+      --resource-group "{{ low_rg_name }}" \
+      --lb-name {{ clb_mid_low_name }} \
+      --name "{{ item.havp_listening_port }}Probe" \
+      --protocol Tcp \
+      --port "{{ item.havp_listening_port }}"
+  args:
+    executable: /usr/bin/bash
+  with_items: "{{ granted_domains }}"
+  delegate_to: localhost
+  tags:
+    - grantdomain
+
+- name: Pause for 5 seconds needed for probe update
+  wait_for: timeout=5
+  delegate_to: localhost
+
+
+- name: Add listener setting to {{ v_clb_mid_low }}
+  become: false
+  run_once: true
+  shell: |
+    az network lb rule create \
+      --lb-name {{ clb_mid_low_name }} \
+      --name "lbrule{{ item.havp_listening_port }}" \
+      --protocol Tcp \
+      --frontend-ip-name "{{ clb_mid_low_frontendIPConfigurations_name }}"  \
+      --backend-pool-name "{{ clb_mid_low_backendAddressPool_name }}" \
+      --frontend-port "{{ item.havp_listening_port }}" \
+      --backend-port "{{ item.havp_listening_port }}" \
+      --resource-group "{{ low_rg_name }}"  \
+      --probe-name "{{ item.havp_listening_port }}Probe"
+  args:
+    executable: /usr/bin/bash
+  with_items: "{{ granted_domains }}"
+  delegate_to: localhost
+  tags:
+    - grantdomain

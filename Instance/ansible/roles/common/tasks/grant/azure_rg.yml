@@ -1,0 +1,29 @@
+---
+
+- name: Gather facts resource groups
+  become: false
+  run_once: true
+  local_action:
+    module: azure_rm_resourcegroup_facts
+  register: rg_facts
+
+
+- name: Gather facts MID resource groups
+  run_once: true
+  set_fact:
+    mid_rg_name: "{{ item.name }}"
+  with_items: "{{ rg_facts.ansible_facts.azure_resourcegroups }}" 
+  when:
+    - item.tags is defined
+    - v_rg_mid in item.tags
+
+
+- name: Gather facts LOW resource groups
+  run_once: true
+  set_fact:
+    low_rg_name: "{{ item.name }}"
+  with_items: "{{ rg_facts.ansible_facts.azure_resourcegroups }}"
+  when:
+    - item.tags is defined
+    - v_rg_low in item.tags
+

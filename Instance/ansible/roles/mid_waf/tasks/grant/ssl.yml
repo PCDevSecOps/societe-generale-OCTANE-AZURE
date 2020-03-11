@@ -1,0 +1,53 @@
+---
+
+- name: Delete old ssl certificates for "{{ item.domain }}"
+  file:
+    path: "{{ v_certificates_path }}/{{ item.domain }}.crt"
+    state: absent
+  with_items:
+    - "{{ granted_domains }}"
+
+- name: Delete old ssl keys for "{{ item.domain }}"
+  file:
+    path: "{{ v_certificates_path }}/{{ item.domain }}.key"
+    state: absent
+  with_items:
+    - "{{ granted_domains }}"
+
+- name: Copy KEY certificates SSL for applications
+  copy:
+    src:  "{{ v_local_certificates_path }}/{{ item.domain }}.key"
+    dest: "{{ v_certificates_path }}/{{ item.domain }}.key"
+    mode: '644'
+  with_items:
+    - "{{ granted_domains }}"
+  ignore_errors: True
+
+
+- name: Copy CRT certificates SSL for applications
+  copy:
+    src: "{{ v_local_certificates_path }}/{{ item.domain }}.crt"
+    dest: "{{ v_certificates_path }}/{{ item.domain }}.crt"
+    mode: '644'
+  with_items:
+    - "{{ granted_domains }}"
+  ignore_errors: True
+
+
+- name: Search certificates for "{{ item.domain }}"
+  stat:
+    path: "{{ v_certificates_path }}/{{ item.domain }}.key"
+  with_items:
+    - "{{ granted_domains }}"
+  register: mid_waf_key_certificats
+
+
+- name: Generate ssl certificates for "{{ item.domain }}"
+  command: "openssl req -x509 -nodes -newkey rsa:2048 -keyout {{ v_certificates_path}}/{{ item.item.domain }}.key -out {{ v_certificates_path}}/{{ item.item.domain }}.crt -days 3650 -subj /CN={{ item.item.domain }}/"
+  args:
+    chdir: "{{ v_certificates_path }}"
+    creates: "certificates"
+  when:
+    - item.stat.exists == False
+  with_items: "{{ mid_waf_key_certificats.results }}"
+

@@ -1,0 +1,119 @@
+---
+
+- name:  Create configuration SURICATA directories for each domain
+  file:
+      path: "{{ v_suricata_root_directory }}/{{ item.domain }}"
+      state: directory
+      mode: 0755
+  with_items: "{{ granted_domains }}"
+
+- name:  Create etc SURICATA directories for each domain
+  file:
+      path: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc"
+      state: directory
+      mode: 0755
+  with_items: "{{ granted_domains }}"
+
+- name:  Create rules SURICATA directories for each domain
+  file:
+      path: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc/rules"
+      state: directory
+      mode: 0755
+  with_items: "{{ granted_domains }}"
+
+- name:  Create log SURICATA directories for each domain
+  file:
+      path: "{{ v_log_path }}/suricata/{{ item.domain }}"
+      state: directory
+      mode: 0755
+  with_items: "{{ granted_domains }}"
+
+- name: Install SURICATA rules for each domain
+  unarchive:
+    src: "emerging.rules.tar.gz"
+    dest: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc/"
+    copy: yes
+  with_items: "{{ granted_domains }}"
+  when:
+   - granted_domains is defined
+  register: granted_suricata_domains_changed
+
+- name: Install SURICATA classifications for each domain
+  copy: 
+    remote_src: True
+    src: "/etc/suricata/classification.config"
+    dest: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc/"
+    owner: root
+    group: root
+  with_items: "{{ granted_domains }}"
+  register: granted_suricata_domains_changed
+
+- name: Install SURICATA references for each domain
+  copy:
+    src: "/etc/suricata/reference.config"
+    dest: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc/"
+    owner: root
+    group: root
+    remote_src: True
+  with_items: "{{ granted_domains }}"
+  register: granted_suricata_domains_changed
+
+- name: Install SURICATA threshold for each domain
+  copy:
+    src: "/etc/suricata/threshold.config"
+    dest: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc/"
+    owner: root
+    group: root
+    remote_src: True
+  with_items: "{{ granted_domains }}"
+  register: granted_suricata_domains_changed
+
+- name: Install SURICATA http-events.rules for each domain
+  copy:
+    src: "/usr/src/suricata-4.0.0/rules/http-events.rules"
+    dest: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc/rules"
+    owner: root
+    group: root
+    remote_src: True
+  with_items: "{{ granted_domains }}"
+  register: granted_suricata_domains_changed
+
+- name: Install SURICATA tls-events.rules for each domain
+  copy:
+    src: "/usr/src/suricata-4.0.0/rules/tls-events.rules"
+    dest: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc/rules"
+    owner: root
+    group: root
+    remote_src: True
+  with_items: "{{ granted_domains }}"
+  register: granted_suricata_domains_changed
+
+- name:  Install SURICATA config file for each domain
+  template:
+    src: "suricata.yaml.j2"
+    dest: "{{ v_suricata_root_directory }}/{{ item.domain }}/etc/suricata.yaml"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_items: "{{ granted_domains }}"
+  notify: Restart SURICATA daemon
+  register: granted_suricata_domains_changed
+
+- name:  Install SURICATA daemon configuration file for each domain
+  template:
+    src: "suricata.service.j2"
+    dest: "/etc/systemd/system/suricata.{{ item.domain }}.service"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_items: "{{ granted_domains }}"
+  notify: Restart SURICATA daemon
+  register: granted_suricata_domains_changed
+
+- name: remember which SURICATA daemons need to restart
+  set_fact:
+    restart_suricata_daemons: "{{ restart_suricata_daemons | default([]) + [item.item.domain] }}"
+  when: item.changed
+  with_items: "{{ granted_suricata_domains_changed.results }}"

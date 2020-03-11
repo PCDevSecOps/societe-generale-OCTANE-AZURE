@@ -1,0 +1,27 @@
+---
+
+- name:  Nginx configuration
+  template:
+    src: "init/nginx_conf.j2"
+    dest: "/etc/nginx/nginx.conf"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_items:
+    - "{{ granted_domains }}"
+  notify: Reload nginx daemon
+
+
+- name:  Add domain configuration files to nginx directory
+  template:
+    src: "grant/nginx_conf.j2"
+    dest: "/etc/nginx/sites/{{item.domain}}.conf"
+    owner: root
+    force: yes
+    group: root
+    mode: 0644
+    backup: yes
+  with_items: 
+    - "{{ granted_domains }}"
+  notify: Reload nginx daemon

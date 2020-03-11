@@ -1,0 +1,7 @@
+alert http any any -> any any (msg:"Do not read gossip during work"; content:"Scarlett"; nocase; classtype:policy-violation; sid:1; rev:1;)
+
+drop http any any -> any any (msg:"La SOC ne tolère pas ce mot"; content:"BlackSun"; nocase; classtype:policy-violation; sid:2; rev:2;)
+
+drop http any any -> any any (msg:"OUPS: touche pas à toto"; content:"toto"; nocase; classtype:policy-violation; sid:3; rev:3;)
+
+drop http any any -> any any (msg:"OUPS: touche pas à Azure"; content:"Azurecli"; nocase; classtype:policy-violation; sid:4; rev:4;)

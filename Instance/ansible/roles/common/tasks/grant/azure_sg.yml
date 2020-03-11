@@ -1,0 +1,75 @@
+---
+
+- name: Gather MID facts security group
+  become: false
+  run_once: true
+  local_action:
+    module: azure_rm_securitygroup_facts
+    resource_group: "{{ mid_rg_name }}"
+  register: waf_facts
+
+
+
+- name: Gather LOW facts security group
+  become: false
+  run_once: true
+  local_action:
+    module: azure_rm_securitygroup_facts
+    resource_group: "{{ low_rg_name }}"
+  register: low_facts
+
+
+
+- name: add rule {{v_sg_waf }} security group
+  become: true
+  run_once: true
+  local_action:
+     module: azure_rm_securitygroup
+     resource_group: "{{ mid_rg_name }}"
+     name: "{{ waf_facts.ansible_facts.azure_securitygroups[0].name }}"
+     purge_rules: no
+     rules:
+        - name: "allow{{ item.http_listening_port }}"
+          protocol: Tcp
+          destination_port_range: "{{ item.http_listening_port }}"
+          access: Allow
+          priority: "{{ item.http_listening_priority }}"
+          direction: Inbound
+        - name: "allow{{ item.https_listening_port }}"
+          protocol: Tcp
+          destination_port_range: "{{ item.https_listening_port }}"
+          access: Allow
+          priority: "{{ item.https_listening_priority }}"
+          direction: Inbound
+  with_items: "{{ granted_domains }}"
+  ignore_errors: True
+  tags:
+    - grantdomain
+
+
+
+- name: add rule {{v_hosting_low }} security group
+  become: true
+  run_once: true
+  local_action:
+    module: azure_rm_securitygroup
+    resource_group: "{{ low_rg_name }}"
+    name: "{{ low_facts.ansible_facts.azure_securitygroups[0].name }}"
+    purge_rules: no
+    rules:
+      - name: "allow{{ item.http_listening_port }}"
+        protocol: Tcp
+        destination_port_range: "{{ item.http_listening_port }}"
+        access: Allow
+        priority: "{{ item.http_listening_priority }}"
+        direction: Inbound
+      - name: "allow{{ item.https_listening_port }}"
+        protocol: Tcp
+        destination_port_range: "{{ item.https_listening_port }}"
+        access: Allow
+        priority: "{{ item.https_listening_priority }}"
+        direction: Inbound
+  with_items: "{{ granted_domains }}"
+  ignore_errors: True
+  tags:
+    - grantdomain

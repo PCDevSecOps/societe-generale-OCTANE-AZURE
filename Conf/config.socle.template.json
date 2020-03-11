@@ -1,0 +1,16 @@
+{
+    "Global": {
+        "Environment": "{dev,hml,prd}",
+        "Product": "iaphost",
+        "Domain": "iap",
+        "Version": "v3"
+    },
+    "Azure": {
+        "Subscription": "azure-ciap-hosting-dev",
+        "SubscriptionId": "socle subscription",
+        "ClientId": "client id to connect to socle",
+        "TenantId": "tenant id to connec to socle",
+        "SecretKey": "client secret to connect to socle",
+        "Region": "northeurope"
+    }
+}

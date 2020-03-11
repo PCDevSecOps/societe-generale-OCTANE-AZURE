@@ -1,0 +1,96 @@
+---
+
+- name: Add granted domains
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "granted_domains_{{stack}}.yml"
+      skip: true
+  tags:
+    - init
+    - grantdomain
+    - mid_waf
+
+- name: Add revoked domains
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "revoked_domains_{{stack}}.yml"
+      skip: true
+  tags:
+    - revokedomain
+    - mid_waf
+
+- name: Add domains with blacklisted URLs
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "domains_with_blacklisted_urls.yml"
+      skip: true
+  tags:
+    - init
+    - grantdomain
+    - mid_waf
+
+- name: Add domains with whitelisted URLs
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "domains_with_whitelisted_urls.yml"
+      skip: true
+  tags:
+    - init
+    - grantdomain
+    - mid_waf
+
+
+- import_tasks: init/suricata.yml
+  tags:
+    - init
+    - mid_waf
+
+
+- import_tasks: grant/ssl.yml
+  tags:
+    - grantdomain
+    - mid_waf
+
+
+- import_tasks: grant/nginx.yml
+  tags:
+    - grantdomain
+    - mid_waf
+
+
+
+- import_tasks: grant/iptables.yml
+  tags:
+    - grantdomain
+    - mid_waf
+
+- import_tasks: grant/suricata.yml
+  tags:
+    - grantdomain
+    - mid_waf
+
+
+- import_tasks: grant/suricata-hosting.yml
+  tags:
+    - grantdomain
+    - mid_waf
+
+- import_tasks: grant/modsecurity.yml
+  tags:
+    - grantdomain
+    - mid_waf
+
+- import_tasks: revoke/nginx.yml
+  tags:
+    - revokedomain
+    - mid_waf
+
+
+- import_tasks: revoke/suricata.yml
+  tags:
+    - revokedomain
+    - mid_waf

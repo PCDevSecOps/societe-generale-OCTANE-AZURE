@@ -1,0 +1,24 @@
+---
+
+- name: Apply common configuration to "{{ stack }}"
+  hosts: "stack_{{ stack }}"
+  become: yes
+  gather_facts: yes
+  roles:
+    - "common"
+
+- name: cIAP "{{ stack }}" setup for "mid_waf"
+  hosts: "stack_{{ stack }}:&waf"
+  become: yes
+  gather_facts: yes
+  roles:
+    - "mid_waf"
+
+- name: cIAP "{{ stack }}" setup for "low_fw"
+  hosts: "stack_{{ stack }}:&fw"
+  become: yes
+  gather_facts: yes
+  roles:
+    - "low_fw"
+
+    

@@ -1,0 +1,7 @@
+---
+
+- name:  Create ssl certificate directory
+  file:
+    path: "{{ v_certificates_path }}"
+    state: directory
+    mode: 0755
